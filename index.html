@@ -7,7 +7,7 @@
   <style>
     * {
       background-color: black;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      font-family: Arial, Helvetica, sans-serif;
       color: #fff;
     }
     .container h1 {
@@ -19,14 +19,14 @@
       flex-wrap: wrap;
     }
     .rps img {
-      width: 130px;
-      height: 130px;
+      width: 120px;
+      height: 120px;
     }
     .rock {
       border: 1px solid #fff;
       border-radius: 50%;
       padding: 35px;
-      margin-right: 5px;
+      margin-right: 10px;
     }
     .paper {
       border: 1px solid #fff;
@@ -46,14 +46,22 @@
     }
     button {
       margin-top: 25px;
-      padding: 4px;
+      padding: 10px 15px;
       color: #fff;
-      border: 2px solid greenyellow;
-      background-color: rgb(11, 97, 68);
+      border: none;
+      background-color: rgb(20, 161, 114);
+      font-size: 15px;
+      cursor: pointer;
+      border-radius: 5px;
+    }
+    .result {
+      font-size: 25px;
+      font-weight: bold;
+      margin-top: 30px;
     }
     .result-desc span img {
-      width: 100px;
-      height: 100px;
+      width: 70px;
+      height: 70px;
       margin: 15px;
     }
 
@@ -63,133 +71,119 @@
   <div class="container">
     <h1>Búa Kéo Bao Game</h1>
     <div class="rps">
-      <div class="rock" onclick="f_rock()">
+      <div class="rock" onclick="playGame('rock')">
         <img src="./images/rock.png" alt="">
       </div>
-      <div class="paper" onclick="f_paper()">
+      <div class="paper" onclick="playGame('paper')">
         <img src="./images/paper.png" alt="">
       </div>
-      <div class="scissors" onclick="f_scissors()">
-        <img src="./images/scissors.jpg" alt="">
+      <div class="scissors" onclick="playGame('scissors')">
+        <img src="./images/scissors.png" alt="">
       </div>
     </div>
     <div class="result"></div>
     <div class="result-desc"></div>
-    <div class="count-result">
-      Wins: <span class="win-total">0</span>
-      Losses: <span class="lose-total">0</span>
-      Ties: <span class="tie-total">0</span>
-    </div>
+    <p class="js-score"></p>
     <button onclick="f_Reset()">Reset Score</button>
   </div>
 
   <script>
-    const rock = document.querySelector('.rock');
-    const paper = document.querySelector('.paper');
-    const scissors = document.querySelector('.scissors');
-    const result = document.querySelector('.result');
-    const resultDesc = document.querySelector('.result-desc');
-    const winTotal = document.querySelector('.win-total');
-    const loseTotal = document.querySelector('.lose-total');
-    const tieTotal = document.querySelector('.tie-total');
 
-    
-    let computerMove = '';
-    let win = 0;
-    let lose = 0;
-    let tie = 0;
+    const score = JSON.parse(localStorage.getItem('score')) || {
+      win: 0,
+      lose: 0,
+      tie: 0
+    } 
+
+    updateScoreElement();
 
     function pickComputerMove(){
       const randomNumber = Math.random();
+      let computerMove = '';
 
       if(randomNumber >= 0 && randomNumber < 1/3){
       computerMove = 'rock';
       }
-      else if(randomNumber >= 1/2 && randomNumber < 2/3){
+      else if(randomNumber >= 1/3 && randomNumber < 2/3){
         computerMove = 'paper';
       }
       else if(randomNumber >= 2/3 && randomNumber < 1){
         computerMove = 'scissors';
       }
+      return computerMove;
     }
 
-    function f_rock(){
-      pickComputerMove();
+    function playGame(playerMove){
+      let result = '';
+      const computerMove = pickComputerMove();
 
-      if(computerMove === 'rock'){
-        result.innerHTML = 'Hòa'
-        resultDesc.innerHTML = `Bạn <span><img src="./images/rock.png"></span> <span><img src="./images/${computerMove}.png"></span> Computer`
-        tie++;
-        tieTotal.innerHTML = tie
+      if(playerMove === 'scissors'){
+        if(computerMove === 'rock'){
+          result = 'You lose.';
+        }
+        else if (computerMove === 'paper'){
+          result = 'You win.';
+        }
+        else if (computerMove === 'scissors'){
+          result = 'Tie.';
+        }
+      }
+      else if(playerMove === 'rock') {
+        if(computerMove === 'rock'){
+          result = 'Tie.';
+        }
+        else if (computerMove === 'paper'){
+          result = 'You lose .';
+        }
+        else if (computerMove === 'scissors'){
+          result = 'You win.';
+        }
+      }
+      else if(playerMove === 'paper'){
+        if(computerMove === 'rock'){
+          result = 'You win.';
+        }
+        else if (computerMove === 'paper'){
+          result = 'Tie.';
+        }
+        else if (computerMove === 'scissors'){
+          result = 'You lose.';
+        }
+      }
 
+      if(result === 'You win.'){
+        score.win += 1;
       }
-      else if (computerMove === 'paper'){
-        result.innerHTML = 'Bạn thua'
-        resultDesc.innerHTML = `Bạn <span><img src="./images/rock.png"></span> <span><img src="./images/${computerMove}.png"></span> Computer`
-        lose++;
-        loseTotal.innerHTML = lose
+      else if (result === 'You lose.'){
+        score.lose += 1;
       }
-      else if (computerMove === 'scissors'){
-        result.innerHTML = 'Bạn thắng'
-        resultDesc.innerHTML = `Bạn <span><img src="./images/rock.png"></span> <span><img src="./images/${computerMove}.jpg"></span> Computer`
-        win++;
-        winTotal.innerHTML = win
+      else if (result === 'Tie.'){
+        score.tie += 1;
       }
-      
+
+      updateScoreElement();
+
+      localStorage.setItem('score',JSON.stringify(score));
+
+      document.querySelector('.result').innerHTML = result;
+      document.querySelector('.result-desc').innerHTML = `
+      Bạn <span> <img src="./images/${playerMove}.png"></span> <span><img src="./images/${computerMove}.png"></span> Computer`
     }
 
-    function f_paper(){
-      pickComputerMove()
-
-      if(computerMove === 'rock'){
-        result.innerHTML = 'Bạn thắng'
-        resultDesc.innerHTML = `Bạn <span><img src="./images/paper.png"></span> <span><img src="./images/${computerMove}.png"></span> Computer`
-        win++;
-        winTotal.innerHTML = win
-      }
-      else if (computerMove === 'paper'){
-        result.innerHTML = 'Hòa'
-        resultDesc.innerHTML = `Bạn <span><img src="./images/paper.png"></span> <span><img src="./images/${computerMove}.png"></span> Computer`
-        tie++;
-        tietotal.innerHTML = tie
-      }
-      else if (computerMove === 'scissors'){
-        result.innerHTML = 'Bạn thua'
-        resultDesc.innerHTML = `Bạn <span><img src="./images/paper.png"></span> <span><img src="./images/${computerMove}.jpg"></span> Computer`
-        lose++;
-        loseTotal.innerHTML = lose
-      }
-    }
-
-    function f_scissors(){
-      pickComputerMove()
-
-      if(computerMove === 'rock'){
-        result.innerHTML = 'Bạn thua'
-        resultDesc.innerHTML = `Bạn <span><img src="./images/scissors.jpg"></span> <span><img src="./images/${computerMove}.png"></span> Computer`
-        lose++;
-        loseTotal.innerHTML = lose
-      }
-      else if (computerMove === 'paper'){
-        result.innerHTML = 'Bạn thắng'
-        resultDesc.innerHTML = `Bạn <span><img src="./images/scissors.jpg"></span> <span><img src="./images/${computerMove}.png"></span> Computer`
-        win++;
-        winTotal.innerHTML = win
-      }
-      else if (computerMove === 'scissors'){
-        result.innerHTML = 'Hòa'
-        resultDesc.innerHTML = `Bạn <span><img src="./images/scissors.jpg"></span> <span><img src="./images/${computerMove}.jpg"></span> Computer`
-        tie++;
-        tieTotal.innerHTML = tie
-      }
+    function updateScoreElement(){
+      document.querySelector('.js-score').innerHTML = `
+        Wins: ${score.win}, Losses: ${score.lose}, Ties: ${score.tie}
+      `;
     }
 
     function f_Reset(){
-      result.innerHTML='';
-      resultDesc.innerHTML='';
-      winTotal.innerHTML=0;
-      loseTotal.innerHTML=0;
-      tieTotal.innerHTML=0;
+      document.querySelector('.result').innerHTML='';
+      document.querySelector('.result-desc').innerHTML='';
+      score.win = 0;
+      score.lose = 0;
+      score.tie = 0;
+      localStorage.removeItem('score');
+      updateScoreElement();
     }
   </script>
 </body>
